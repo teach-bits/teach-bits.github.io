@@ -16,11 +16,14 @@ jobs:
       id: identify_added_blog_post
       run: |
         sha=${{ github.sha }}
+        echo "$sha"
 
         post_file=$(git diff --name-only --diff-filter=A $sha)
+        echo "$post_file"
         if [ -n "$post_file" ]; then
           new_post_file=$(echo "$post_file" | head -n 1)
-
+          echo "$new_post_file"
+  
           title=$(awk '/^title:/ {$1=""; sub(/^[ \t]+/, ""); print}' "$new_post_file" | tr -d '"')
           date=$(echo "$new_post_file" | grep -oP '\d{4}-\d{2}-\d{2}' | sed 's/-/\//g')
           tags=$(awk '/^tags:/ {for (i=2; i<=NF; i++) print "#" $i}' "$new_post_file" | tr -d '[,]' | tr '\n' ' ')
@@ -30,8 +33,10 @@ jobs:
           post_url="$base_url/$date/$url"
 
           echo "post_title=$title" >> $GITHUB_ENV
+          echo "post_title=$title"
           echo "post_url=$post_url" >> $GITHUB_ENV
           echo "post_tags=$tags" >> $GITHUB_ENV
+          echo "post_tags=$tags"
         fi
     - name: Post to Mastodon
       id: mastodon
@@ -43,5 +48,22 @@ jobs:
         message: |
           "${{ env.post_title }}"
           ${{ env.post_url }}
+
+    - name: Debugging and fallback post to Mastodon
+      id: mastodon_fallback
+      if: env.post_title == '' || env.post_url == ''
+      run: |
+        echo "Variable ${{ env.post_title }} or ${{ env.post_url }} was not set."
+        echo "Sending a general fallback post."
+  
+    - name: Fallback Post to Mastodon
+      if: env.post_title == '' || env.post_url == ''
+      uses: cbrgm/mastodon-github-action@v2
+      with:
+        access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+        url: ${{ secrets.MASTODON_URL }}
+        message: |
+          "Neuer Blogpost zu unserem Schokodrucker:"
+          "https://teachbits.de"
 
           ${{ env.post_tags }} #FediLZ
