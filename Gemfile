@@ -13,7 +13,6 @@ source "https://rubygems.org"
 gem "jekyll-theme-hydejack", "~> 9.1"
 
 gem "github-pages", group: :jekyll_plugins
-gem "jekyll-include-cache", group: :jekyll_plugins
 
 # IMPORTANT: The followign gem is used to compile math formulas to 
 # KaTeX during site building.
