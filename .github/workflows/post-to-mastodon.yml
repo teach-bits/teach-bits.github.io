@@ -63,7 +63,7 @@ jobs:
         access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
         url: ${{ secrets.MASTODON_URL }}
         message: |
-          "Neuer Blogpost zu unserem Schokodrucker:"
-          "https://teachbits.de"
+          Neuer Blogpost!
+          https://teachbits.de
 
           ${{ env.post_tags }} #FediLZ
